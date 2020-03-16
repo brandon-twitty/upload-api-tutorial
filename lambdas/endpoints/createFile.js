@@ -1,4 +1,4 @@
-const Responses = require('../common/API_Responses');
+const Responses = require('../common/API_Response');
 const S3 = require('../common/S3');
 
 const bucket = process.env.bucketName;

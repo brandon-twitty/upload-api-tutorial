@@ -19,16 +19,28 @@ provider:
   profile: serverless
   region: us-east-1
   environment:
-    CANDIDATE_TABLE: ${self:service}-${opt:stage, self:provider.stage}
-    CANDIDATE_EMAIL_TABLE: "candidate-email-${opt:stage, self:provider.stage}"
+    tableName: ${self:custom.tableName}
+    bucketName: ${self:custom.bucketName}
   iamRoleStatements:
     - Effect: Allow
       Action:
-        - dynamodb:Query
-        - dynamodb:Scan
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-      Resource: "*"
+        - dynamodb:*
+        - s3:*
+
+      Resource: '*'
+plugins:
+  - serverless-s3-sync
+  - serverless-webpack
+#  - serverless-bundle
+package:
+  individually: true
+
+custom:
+  tableName: candidate
+  bucketName:
+    s3Sync:
+      - bucketName: myserverless-bucket (feakalink)
+        localDir: UploadData
 functions:
   candidateSubmission:
     handler: lambdas/endpoints/candidate.submit
@@ -38,13 +50,13 @@ functions:
       - http:
           path: candidates
           method: post
-  getUser:
-    handler: lambdas/endpoints/getUser.handler
-    events:
-      - http:
-          path: get-user/{ID}
-          method: GET
-          cors: true
+ # getUser:
+  #  handler: lambdas/endpoints/getUser.handler
+   # events:
+    #  - http:
+     #     path: get-user/{ID}
+      #    method: GET
+       #   cors: true
   createFile:
     handler: lambdas/endpoints/createFile.handler
     events:
@@ -81,4 +93,4 @@ resources:
           StreamSpecification:
             StreamViewType: "NEW_AND_OLD_IMAGES"
         BillingMode: PAY_PER_REQUEST
-        TableName: ${self:provider.environment.CANDIDATE_TABLE}
+        TableName:  ${self:custom.tableName}
