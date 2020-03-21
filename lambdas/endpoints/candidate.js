@@ -44,7 +44,7 @@ module.exports.submit = (event, context, callback) => {
 const submitCandidateP = candidate => {
     console.log('Submitting candidate');
     const candidateInfo = {
-        TableName: process.env.CANDIDATE_TABLE,
+        TableName: process.env.tableName,
         Item: candidate,
     };
     return dynamoDb.put(candidateInfo).promise()

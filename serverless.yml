@@ -11,13 +11,13 @@
 #
 # Happy Coding!
 
-service: candidate-service
+service: patient-service
 frameworkVersion: ">=1.1.0 <2.0.0"
 provider:
   name: aws
   runtime: nodejs12.x
-  profile: serverless
-  region: us-east-1
+  #profile: serverless
+  region: sa-east-1
   environment:
     tableName: ${self:custom.tableName}
     bucketName: ${self:custom.bucketName}
@@ -36,61 +36,44 @@ package:
   individually: true
 
 custom:
-  tableName: candidate
-  bucketName:
-    s3Sync:
-      - bucketName: myserverless-bucket (feakalink)
-        localDir: UploadData
+  tableName: patient
+
 functions:
-  candidateSubmission:
+  patientSubmission:
     handler: lambdas/endpoints/candidate.submit
     memorySize: 128
-    description: Submit candidate information and starts interview process.
+    description: Submit patient info for appointment
     events:
       - http:
-          path: candidates
+          path: patients
           method: post
- # getUser:
-  #  handler: lambdas/endpoints/getUser.handler
-   # events:
-    #  - http:
-     #     path: get-user/{ID}
-      #    method: GET
-       #   cors: true
-  createFile:
-    handler: lambdas/endpoints/createFile.handler
+          cors: true
+  createUser:
+    handler: lambdas/endpoints/createUser.handler
     events:
       - http:
-          path: create-file/{fileName}
+          path: create-user/{ID}
           method: POST
           cors: true
-  getFile:
-    handler: lambdas/endpoints/getFile.handler
+  getUsers:
+    handler: lambdas/endpoints/getUsers.handler
     events:
       - http:
-          path: get-file/{fileName}
+          path: get-user/{ID}
           method: GET
           cors: true
 
+
 resources:
   Resources:
-        #database
-    CandidatesDynamoDbTable:
-      Type: 'AWS::DynamoDB::Table'
-      DeletionPolicy: Retain
+    MyDynamoDbTable:
+      Type: AWS::DynamoDB::Table
       Properties:
+        TableName: ${self:custom.tableName}
         AttributeDefinitions:
-          -
-            AttributeName: "id"
-            AttributeType: "S"
+          - AttributeName: ID
+            AttributeType: S
         KeySchema:
-           -
-             AttributeName: "id"
-             KeyType: "HASH"
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-          StreamSpecification:
-            StreamViewType: "NEW_AND_OLD_IMAGES"
+          - AttributeName: ID
+            KeyType: HASH
         BillingMode: PAY_PER_REQUEST
-        TableName:  ${self:custom.tableName}
